@@ -18,4 +18,27 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <licenses>
+        <license>
+            <name>Apache-2.0</name>
+            <url>https://github.com/flowerinsnowdh/JavaXML/blob/master/LICENSE</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>https://github.com/flowerinsnowdh/JavaXML.git</connection>
+        <url>https://github.com/flowerinsnowdh/JavaXML</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <email>flowerimsnow@hotmail.com</email>
+            <name>flowerinsnow</name>
+            <roles>
+                <role>Owner</role>
+            </roles>
+            <timezone>+8</timezone>
+        </developer>
+    </developers>
 </project>
