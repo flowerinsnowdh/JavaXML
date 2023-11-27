@@ -14,6 +14,7 @@ import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -64,7 +65,7 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
     @Override
     public @Nullable DOMXMLElement getElement(@NotNull String name) {
         List<DOMXMLElement> elements = childElements.get(name);
-        if (!elements.isEmpty()) {
+        if (elements != null && !elements.isEmpty()) {
             return elements.get(0);
         }
         return null;
@@ -422,10 +423,33 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
             }
 
             Class<?> type = field.getType();
-            if (type.equals(Byte.class) || type.equals(Byte.TYPE)) {
-                String textString = getTextString();
+            if (type.equals(Boolean.class) || type.equals(Boolean.TYPE)) {
                 WriteObjectNumberUtils.getConfigValue(
-                        textString, missDo, wrongTypeDo, defaultValue,
+                        getElement(fieldName), missDo, wrongTypeDo, defaultValue,
+                        Boolean::parseBoolean,
+                        valueParsed -> { // 成功解析
+                            try {
+                                field.set(object, valueParsed);
+                            } catch (IllegalAccessException e) {
+                                throw new UnexpectedException(e);
+                            }
+                        },
+                        null, // 值不正确且WrongType是THROWING，但不可能
+                        () -> { // 值是空且OnMiss是THROWING
+                            throw new NodeMissingException("'" + fieldName + "' must not be null.");
+                        },
+                        default_ -> { // 值不正确且WrongType是DEFAULT或值是空且OnMiss是DEFAULT
+                            try {
+                                field.set(object, default_);
+                            } catch (IllegalAccessException e) {
+                                throw new UnexpectedException(e);
+                            }
+                        },
+                        null // 获取默认值异常时抛出，但不可能
+                );
+            } else if (type.equals(Byte.class) || type.equals(Byte.TYPE)) {
+                WriteObjectNumberUtils.getConfigValue(
+                        getElement(fieldName), missDo, wrongTypeDo, defaultValue,
                         Byte::parseByte,
                         valueParsed -> { // 成功解析
                             try {
@@ -438,7 +462,7 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
                             throw new NodeWrongTypeException("'" + fieldName + "' must be byte type.", ex);
                         },
                         () -> { // 值是空且OnMiss是THROWING
-                            throw new NodeMissingException("'" + fieldName + "' must be not null.");
+                            throw new NodeMissingException("'" + fieldName + "' must not be null.");
                         },
                         default_ -> { // 值不正确且WrongType是DEFAULT或值是空且OnMiss是DEFAULT
                             try {
@@ -452,9 +476,8 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
                         }
                 );
             } else if (type.equals(Short.class) || type.equals(Short.TYPE)) {
-                String textString = getTextString();
                 WriteObjectNumberUtils.getConfigValue(
-                        textString, missDo, wrongTypeDo, defaultValue,
+                        getElement(fieldName), missDo, wrongTypeDo, defaultValue,
                         Short::parseShort,
                         valueParsed -> { // 成功解析
                             try {
@@ -467,7 +490,7 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
                             throw new NodeWrongTypeException("'" + fieldName + "' must be short type.", ex);
                         },
                         () -> { // 值是空且OnMiss是THROWING
-                            throw new NodeMissingException("'" + fieldName + "' must be not null.");
+                            throw new NodeMissingException("'" + fieldName + "' must not be null.");
                         },
                         default_ -> { // 值不正确且WrongType是DEFAULT或值是空且OnMiss是DEFAULT
                             try {
@@ -481,9 +504,8 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
                         }
                 );
             } else if (type.equals(Integer.class) || type.equals(Integer.TYPE)) {
-                String textString = getTextString();
                 WriteObjectNumberUtils.getConfigValue(
-                        textString, missDo, wrongTypeDo, defaultValue,
+                        getElement(fieldName), missDo, wrongTypeDo, defaultValue,
                         Integer::parseInt,
                         valueParsed -> { // 成功解析
                             try {
@@ -496,7 +518,7 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
                             throw new NodeWrongTypeException("'" + fieldName + "' must be int type.", ex);
                         },
                         () -> { // 值是空且OnMiss是THROWING
-                            throw new NodeMissingException("'" + fieldName + "' must be not null.");
+                            throw new NodeMissingException("'" + fieldName + "' must not be null.");
                         },
                         default_ -> { // 值不正确且WrongType是DEFAULT或值是空且OnMiss是DEFAULT
                             try {
@@ -510,9 +532,8 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
                         }
                 );
             } else if (type.equals(Long.class) || type.equals(Long.TYPE)) {
-                String textString = getTextString();
                 WriteObjectNumberUtils.getConfigValue(
-                        textString, missDo, wrongTypeDo, defaultValue,
+                        getElement(fieldName), missDo, wrongTypeDo, defaultValue,
                         Long::parseLong,
                         valueParsed -> { // 成功解析
                             try {
@@ -525,7 +546,7 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
                             throw new NodeWrongTypeException("'" + fieldName + "' must be long type.", ex);
                         },
                         () -> { // 值是空且OnMiss是THROWING
-                            throw new NodeMissingException("'" + fieldName + "' must be not null.");
+                            throw new NodeMissingException("'" + fieldName + "' must not be null.");
                         },
                         default_ -> { // 值不正确且WrongType是DEFAULT或值是空且OnMiss是DEFAULT
                             try {
@@ -539,9 +560,8 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
                         }
                 );
             } else if (type.equals(Float.class) || type.equals(Float.TYPE)) {
-                String textString = getTextString();
                 WriteObjectNumberUtils.getConfigValue(
-                        textString, missDo, wrongTypeDo, defaultValue,
+                        getElement(fieldName), missDo, wrongTypeDo, defaultValue,
                         Float::parseFloat,
                         valueParsed -> { // 成功解析
                             try {
@@ -554,7 +574,7 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
                             throw new NodeWrongTypeException("'" + fieldName + "' must be float type.", ex);
                         },
                         () -> { // 值是空且OnMiss是THROWING
-                            throw new NodeMissingException("'" + fieldName + "' must be not null.");
+                            throw new NodeMissingException("'" + fieldName + "' must not be null.");
                         },
                         default_ -> { // 值不正确且WrongType是DEFAULT或值是空且OnMiss是DEFAULT
                             try {
@@ -568,9 +588,8 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
                         }
                 );
             } else if (type.equals(Double.class) || type.equals(Double.TYPE)) {
-                String textString = getTextString();
                 WriteObjectNumberUtils.getConfigValue(
-                        textString, missDo, wrongTypeDo, defaultValue,
+                        getElement(fieldName), missDo, wrongTypeDo, defaultValue,
                         Double::parseDouble,
                         valueParsed -> { // 成功解析
                             try {
@@ -583,7 +602,7 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
                             throw new NodeWrongTypeException("'" + fieldName + "' must be double type.", ex);
                         },
                         () -> { // 值是空且OnMiss是THROWING
-                            throw new NodeMissingException("'" + fieldName + "' must be not null.");
+                            throw new NodeMissingException("'" + fieldName + "' must not be null.");
                         },
                         default_ -> { // 值不正确且WrongType是DEFAULT或值是空且OnMiss是DEFAULT
                             try {
@@ -597,9 +616,8 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
                         }
                 );
             } else if (type.equals(String.class)) {
-                String textString = getTextString();
                 WriteObjectNumberUtils.getConfigValue(
-                        textString, missDo, wrongTypeDo, defaultValue,
+                        getElement(fieldName), missDo, wrongTypeDo, defaultValue,
                         text -> text,
                         valueParsed -> { // 成功解析
                             try {
@@ -629,9 +647,11 @@ public class DOMXMLElement implements XMLElement, WrappedXMLNode<Element> {
                     }
                 }
                 try {
-                    Object childObject = field.get(object);
+                    Object childObject = field.getType().getDeclaredConstructor().newInstance();
                     childElement.writeObject(childObject);
-                } catch (IllegalAccessException e) {
+                    field.set(object, childObject);
+                } catch (IllegalAccessException | NoSuchMethodException | InstantiationException |
+                         InvocationTargetException e) {
                     throw new UnexpectedException(e);
                 }
             }
