@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<test>
+    <fieldA>
+        <fieldB>fieldValue</fieldB>
+        <fieldC/>
+        <fieldBoolean>true</fieldBoolean>
+    </fieldA>
+</test>

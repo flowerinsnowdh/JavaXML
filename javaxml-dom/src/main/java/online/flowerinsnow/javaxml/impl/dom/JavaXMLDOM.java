@@ -10,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-public abstract class JavaDOMXML {
+public abstract class JavaXMLDOM {
     public static XMLDocument wrap(Document document) {
         return new DOMXMLDocument(document);
     }
